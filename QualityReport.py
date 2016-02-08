@@ -2,13 +2,13 @@
 """
 Created on Mon Feb  8 13:07:44 2016
 
-@author: laura
+@author: laura mcgovern
 @student number: C12431378
 @title: Assignment 1: Data Quality Report
 """
 
 # Import all libraries needed
-import pandas as pd #this is how I usually import pandas
+import pandas as pd 
 from pandas import DataFrame, read_csv
 import matplotlib.pyplot as plt
 
@@ -36,7 +36,9 @@ class DataQuality(object):
         """
         The get_data method takes the data set DataSet.txt and assigns
         each colum a title from the featuresNames.txt file in order to
-        make the data more readable.
+        make the data more readable. 
+        
+        This method essentially creates the Analytics Basics Table.
         """
 
         ins = open('./data/featureNames.txt', "r")
@@ -77,6 +79,7 @@ class DataQuality(object):
 
         # Create DataFrame with columns of categorical data
         getCatData = pd.DataFrame(lst, columns=cat)
+        getCatData.describe()
         return(getCatData)
                
     
