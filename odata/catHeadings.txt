@@ -1,0 +1,9 @@
+Count
+% Miss. 
+Card.
+Mode
+Mode Freq.
+Mode %
+2nd Mode
+2nd Mode Freq.
+2nd Mode %

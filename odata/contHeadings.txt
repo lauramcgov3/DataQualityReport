@@ -1,0 +1,10 @@
+Count
+% Miss.
+Card.
+Min
+1st Qrt.
+Mean
+Median
+3rd Qrt.
+Max
+Std. Dev.
