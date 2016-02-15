@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy import nan
 from scipy.stats.mstats import mode
+from collections import Counter
 
 
 class DataQuality(object):
@@ -185,8 +186,20 @@ class DataQuality(object):
         
               
         # Final report for continuous data      
-        cont_report = pd.DataFrame((count.join(miss_pct).join(unique_value_counts).join(minimum_values).join(f_qrt).join(mean).join(median).join(t_qrt).join(max_values).join(std_dev)))
+        cont_report = pd.DataFrame((count.
+                                    join(miss_pct).
+                                    join(unique_value_counts).
+                                    join(minimum_values).
+                                    join(f_qrt).join(mean).
+                                    join(median).
+                                    join(t_qrt).
+                                    join(max_values).
+                                    join(std_dev)))
+                                    
         cont_report.index.name = 'Feature'
+        
+        print("\n Continuous Features Data Quality Table \n\n")        
+        print(cont_report)
         
         cont_report.to_csv('./data/ContReport.csv')
         
@@ -203,6 +216,18 @@ class DataQuality(object):
             line = line.strip()
             catFeatures.append(line)
             
+        # Read in catHeadings.txt (text file of the categorical table headings)
+        headingsFile = open('./odata/catHeadings.txt', "r")
+        
+        # Create array to store categorical headings
+        catHeadings = []
+        
+        # Add headings to array
+        for line in headingsFile:
+            line = line.strip()
+            catHeadings.append(line)
+            
+            
         inputCatData = pd.read_csv('./odata/catData.csv',
                         sep=',',
                         header=0,
@@ -211,42 +236,67 @@ class DataQuality(object):
                         tupleize_cols=False,
                         error_bad_lines=True,
                         warn_bad_lines=True,
-                        skip_blank_lines=True
+                        skip_blank_lines=True,
+                        names = catFeatures
                         )
+                        
+        catDataCols = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        
+        catRows = list()
+        
         # Selects only columns wanted for report
         catData = pd.DataFrame(inputCatData[catFeatures])
         catData.replace(to_replace='?', value=nan)
-        print(catData)
+        #print(catData)
         
         # Count 
         count = pd.DataFrame(catData.count(), columns=['Count'])
-        print(count)
+        # print(count)
         
         # Calculate missing %        
         miss_data = catData.isnull().sum()
         miss_pct = pd.DataFrame((miss_data/count.Count)*100, columns =[' % Miss.'])
-        print(miss_pct)        
+        # print(miss_pct)        
         
         # Cardinality 
         unique_value_counts = pd.DataFrame(columns=['Card.'])
         for v in list(catData.columns.values):
             unique_value_counts.loc[v] = [catData[v].nunique()]
-        print(unique_value_counts)
+        # print(unique_value_counts)
         
         # Mode
-        mode_values = pd.DataFrame(catData.mode().transpose())
-        mode_values.columns = ['Mode']
+        # mode_values = pd.DataFrame(catData.mode().transpose())
+        # mode_values.columns = ['Mode']
         
-        # Mode frequency
-        f = lambda catData: mode(catData, axis=None)[0]
+        for i in catDataCols:
+            data = Counter(inputCatData[catFeatures[i]].tolist())
+            modes = data.most_common(2)
+            catRows.append(
+                [catFeatures[i].upper(),#featureName
+                modes[0][0],#mode, value that occurs most often
+                modes[0][1],#mode freq
+                round((modes[0][1] / inputCatData[catFeatures[i]].count() * 100), 4),#mode %,
+                modes[1][0],#2nd mode,
+                modes[1][1],#2nd mode freq,
+                round((modes[1][1] / inputCatData[catFeatures[i]].count() * 100), 4)#2nd mode %,
+                ]
+            )
+            
+        mode_maths = pd.DataFrame(catRows, columns = ['Feature', 'Mode', 'Mode Freq.', 'Mode %', '2nd Mode', '2nd Mode Freq.', '2nd Mode %' ], index=catFeatures)
+        mode_values = pd.DataFrame(mode_maths[catHeadings], index=catFeatures)
         
-        mode_freq = catData.groupby(level=0).apply(f)
-        print(mode_freq)
+        # Final report for continuous data      
+        cat_report = pd.DataFrame((count.
+                                    join(miss_pct).
+                                    join(unique_value_counts).
+                                    join(mode_values)))
+                                    
+        cat_report.index.name = 'Feature'
         
-        # 2nd Mode
+        print(" \n Categorical Features Data Quality Table \n\n")        
+        print(cat_report)
         
-        
-        
+        cat_report.to_csv('./data/CatReport.csv')
         
         
          

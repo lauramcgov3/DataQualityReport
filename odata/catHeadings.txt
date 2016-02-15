@@ -1,6 +1,3 @@
-Count
-% Miss. 
-Card.
 Mode
 Mode Freq.
 Mode %
